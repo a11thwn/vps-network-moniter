@@ -33,6 +33,9 @@ VPS节点 (Python API + vnstat) → Cloudflare Workers (代理) → Vue前端 (�
 # 一键部署（自动安装Python 3.11和所有依赖）
 sudo bash scripts/deploy.sh
 
+# Ubuntu 22.04 专用安装（如果遇到包名问题）
+sudo bash scripts/install-ubuntu22.sh
+
 # 手动安装Python 3.11（如果需要）
 sudo bash scripts/check-python.sh install
 ```

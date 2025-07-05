@@ -50,29 +50,32 @@ check_system() {
         apt update
         
         # 安装Python 3.11
-        apt install -y python3.11 python3.11-venv python3.11-dev python3.11-pip
+        apt install -y python3.11 python3.11-venv python3.11-dev python3-pip
         
         # 创建软链接（如果不存在）
         if [ ! -f /usr/bin/python3.11 ]; then
             log_warn "Python 3.11 安装可能失败，尝试其他方法..."
             
-            # 尝试从源码编译安装
-            apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
-            
-            # 下载Python 3.11源码
-            cd /tmp
-            wget https://www.python.org/ftp/python/3.11.7/Python-3.11.7.tgz
-            tar -xf Python-3.11.7.tgz
-            cd Python-3.11.7
-            
-            # 编译安装
-            ./configure --enable-optimizations
-            make -j$(nproc)
-            make altinstall
-            
-            # 创建软链接
-            ln -sf /usr/local/bin/python3.11 /usr/bin/python3.11
-            ln -sf /usr/local/bin/pip3.11 /usr/bin/pip3.11
+                    # 尝试从源码编译安装
+        apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+        
+        # 下载Python 3.11源码
+        cd /tmp
+        wget https://www.python.org/ftp/python/3.11.7/Python-3.11.7.tgz
+        tar -xf Python-3.11.7.tgz
+        cd Python-3.11.7
+        
+        # 编译安装
+        ./configure --enable-optimizations
+        make -j$(nproc)
+        make altinstall
+        
+        # 创建软链接
+        ln -sf /usr/local/bin/python3.11 /usr/bin/python3.11
+        ln -sf /usr/local/bin/pip3.11 /usr/bin/pip3
+        
+        # 确保pip可用
+        python3.11 -m ensurepip --upgrade
         fi
         
         log_info "Python 3.11 安装完成"

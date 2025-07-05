@@ -39,10 +39,10 @@ check_python_version() {
         log_info "✓ Python 3.11 已安装: $version"
         
         # 检查pip
-        if command -v pip3.11 &> /dev/null; then
-            log_info "✓ pip3.11 已安装"
+        if command -v pip3 &> /dev/null; then
+            log_info "✓ pip3 已安装"
         else
-            log_warn "⚠ pip3.11 未安装"
+            log_warn "⚠ pip3 未安装"
         fi
         
         return 0
@@ -125,7 +125,7 @@ install_python311() {
     apt update
     
     # 尝试从包管理器安装
-    if apt install -y python3.11 python3.11-venv python3.11-dev python3.11-pip; then
+    if apt install -y python3.11 python3.11-venv python3.11-dev python3-pip; then
         log_info "✓ 通过包管理器安装成功"
         return 0
     fi
@@ -148,7 +148,10 @@ install_python311() {
     
     # 创建软链接
     ln -sf /usr/local/bin/python3.11 /usr/bin/python3.11
-    ln -sf /usr/local/bin/pip3.11 /usr/bin/pip3.11
+    ln -sf /usr/local/bin/pip3.11 /usr/bin/pip3
+    
+    # 确保pip可用
+    python3.11 -m ensurepip --upgrade
     
     log_info "✓ 源码编译安装成功"
 }
