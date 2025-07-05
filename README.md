@@ -28,15 +28,13 @@ VPS节点 (Python API + vnstat) → Cloudflare Workers (代理) → Vue前端 (�
 
 ### 1. VPS端部署
 
-#### 安装依赖
+#### 自动安装依赖
 ```bash
-# 创建Python虚拟环境
-python3.11 -m venv venv
-source venv/bin/activate
+# 一键部署（自动安装Python 3.11和所有依赖）
+sudo bash scripts/deploy.sh
 
-# 安装依赖
-cd vps-api
-pip install -r requirements.txt
+# 手动安装Python 3.11（如果需要）
+sudo bash scripts/check-python.sh install
 ```
 
 #### 配置SSL证书
@@ -302,9 +300,9 @@ vps-network-monitor/
 ```
 
 ### 开发环境
-- Python 3.11+
+- Python 3.11+ (自动安装)
 - Node.js 18+
-- vnstat 2.x
+- vnstat 2.x (自动安装)
 
 ### 贡献指南
 1. Fork项目

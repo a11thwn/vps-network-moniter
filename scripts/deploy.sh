@@ -42,11 +42,42 @@ check_root() {
 check_system() {
     log_info "检查系统要求..."
     
-    # 检查Python版本
+    # 检查并安装Python 3.11
     if ! command -v python3.11 &> /dev/null; then
-        log_error "Python 3.11 未安装"
-        log_info "请先安装Python 3.11"
-        exit 1
+        log_info "Python 3.11 未安装，正在安装..."
+        
+        # 更新包列表
+        apt update
+        
+        # 安装Python 3.11
+        apt install -y python3.11 python3.11-venv python3.11-dev python3.11-pip
+        
+        # 创建软链接（如果不存在）
+        if [ ! -f /usr/bin/python3.11 ]; then
+            log_warn "Python 3.11 安装可能失败，尝试其他方法..."
+            
+            # 尝试从源码编译安装
+            apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+            
+            # 下载Python 3.11源码
+            cd /tmp
+            wget https://www.python.org/ftp/python/3.11.7/Python-3.11.7.tgz
+            tar -xf Python-3.11.7.tgz
+            cd Python-3.11.7
+            
+            # 编译安装
+            ./configure --enable-optimizations
+            make -j$(nproc)
+            make altinstall
+            
+            # 创建软链接
+            ln -sf /usr/local/bin/python3.11 /usr/bin/python3.11
+            ln -sf /usr/local/bin/pip3.11 /usr/bin/pip3.11
+        fi
+        
+        log_info "Python 3.11 安装完成"
+    else
+        log_info "Python 3.11 已安装，版本: $(python3.11 --version)"
     fi
     
     # 检查并安装vnstat
@@ -64,6 +95,15 @@ check_system() {
     else
         log_info "vnstat 已安装，版本: $(vnstat --version | head -n1)"
     fi
+    
+    # 检查并安装其他必要工具
+    local required_tools=("curl" "wget" "git" "jq" "openssl")
+    for tool in "${required_tools[@]}"; do
+        if ! command -v "$tool" &> /dev/null; then
+            log_info "安装 $tool..."
+            apt install -y "$tool"
+        fi
+    done
     
     log_info "系统要求检查完成"
 }
@@ -87,16 +127,40 @@ setup_directories() {
 setup_venv() {
     log_info "创建Python虚拟环境..."
     
-    if [ ! -d "$VENV_DIR" ]; then
-        python3.11 -m venv "$VENV_DIR"
+    # 确保Python 3.11可用
+    if ! command -v python3.11 &> /dev/null; then
+        log_error "Python 3.11 不可用，请检查安装"
+        exit 1
     fi
     
+    # 删除旧的虚拟环境（如果存在）
+    if [ -d "$VENV_DIR" ]; then
+        log_info "删除旧的虚拟环境..."
+        rm -rf "$VENV_DIR"
+    fi
+    
+    # 创建新的虚拟环境
+    log_info "创建Python 3.11虚拟环境..."
+    python3.11 -m venv "$VENV_DIR"
+    
     # 激活虚拟环境并安装依赖
+    log_info "安装Python依赖..."
     source "$VENV_DIR/bin/activate"
+    
+    # 升级pip
     pip install --upgrade pip
-    pip install -r "$API_DIR/requirements.txt"
+    
+    # 安装依赖
+    if [ -f "$API_DIR/requirements.txt" ]; then
+        pip install -r "$API_DIR/requirements.txt"
+    else
+        log_error "requirements.txt 文件不存在"
+        exit 1
+    fi
     
     log_info "虚拟环境设置完成"
+    log_info "Python版本: $(python --version)"
+    log_info "虚拟环境路径: $VENV_DIR"
 }
 
 # 配置服务
