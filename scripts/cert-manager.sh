@@ -13,8 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 # 证书路径
-SELF_SIGNED_CERT="/opt/vps-traffic-monitor/ssl/certificate.crt"
-SELF_SIGNED_KEY="/opt/vps-traffic-monitor/ssl/private.key"
+SELF_SIGNED_CERT="/opt/vps-network-moniter/ssl/certificate.crt"
+SELF_SIGNED_KEY="/opt/vps-network-moniter/ssl/private.key"
 
 # 日志函数
 log_info() {
@@ -215,7 +215,7 @@ regenerate_self_signed_cert() {
     
     # 备份旧证书
     if [ -f "$SELF_SIGNED_CERT" ]; then
-        local backup_dir="/opt/vps-traffic-monitor/ssl/backup/$(date +%Y%m%d_%H%M%S)"
+        local backup_dir="/opt/vps-network-moniter/ssl/backup/$(date +%Y%m%d_%H%M%S)"
         mkdir -p "$backup_dir"
         cp "$SELF_SIGNED_CERT" "$backup_dir/"
         cp "$SELF_SIGNED_KEY" "$backup_dir/"

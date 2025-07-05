@@ -35,8 +35,8 @@ log_test() {
 
 # 获取API Key
 get_api_key() {
-    if [ -f "/opt/vps-traffic-monitor/vps-api/config.py" ]; then
-        API_KEY=$(grep -o 'api_key.*=.*"[^"]*"' /opt/vps-traffic-monitor/vps-api/config.py | cut -d'"' -f2)
+    if [ -f "/opt/vps-network-moniter/vps-api/config.py" ]; then
+        API_KEY=$(grep -o 'api_key.*=.*"[^"]*"' /opt/vps-network-moniter/vps-api/config.py | cut -d'"' -f2)
         if [ "$API_KEY" = "your-secret-api-key-here" ]; then
             log_error "API Key未配置，请先运行部署脚本"
             exit 1
@@ -103,7 +103,7 @@ test_https() {
     log_test "测试HTTPS连接..."
     
     # 检查是否使用自签证书
-    if [ -f "/opt/vps-traffic-monitor/ssl/certificate.crt" ]; then
+    if [ -f "/opt/vps-network-moniter/ssl/certificate.crt" ]; then
         log_info "检测到自签证书"
         
         # 测试自签证书

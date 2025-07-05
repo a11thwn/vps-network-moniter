@@ -59,7 +59,7 @@ check_python_path() {
     local python_paths=(
         "/usr/bin/python3.11"
         "/usr/local/bin/python3.11"
-        "/opt/vps-traffic-monitor/venv/bin/python"
+        "/opt/vps-network-moniter/venv/bin/python"
     )
     
     for path in "${python_paths[@]}"; do
@@ -74,7 +74,7 @@ check_python_path() {
 check_venv() {
     log_check "检查虚拟环境..."
     
-    local venv_path="/opt/vps-traffic-monitor/venv"
+    local venv_path="/opt/vps-network-moniter/venv"
     
     if [ -d "$venv_path" ]; then
         log_info "✓ 虚拟环境存在: $venv_path"
@@ -100,7 +100,7 @@ check_venv() {
 check_dependencies() {
     log_check "检查Python依赖包..."
     
-    local venv_path="/opt/vps-traffic-monitor/venv"
+    local venv_path="/opt/vps-network-moniter/venv"
     
     if [ -f "$venv_path/bin/python" ]; then
         local required_packages=("fastapi" "uvicorn" "pydantic")

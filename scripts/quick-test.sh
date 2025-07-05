@@ -48,8 +48,8 @@ echo
 
 # 4. 获取API Key
 echo "4. 获取API Key..."
-if [ -f "/opt/vps-traffic-monitor/vps-api/config.py" ]; then
-    API_KEY=$(grep -o 'api_key.*=.*"[^"]*"' /opt/vps-traffic-monitor/vps-api/config.py | cut -d'"' -f2)
+if [ -f "/opt/vps-network-moniter/vps-api/config.py" ]; then
+    API_KEY=$(grep -o 'api_key.*=.*"[^"]*"' /opt/vps-network-moniter/vps-api/config.py | cut -d'"' -f2)
     if [ "$API_KEY" != "your-secret-api-key-here" ]; then
         echo -e "${GREEN}✓ API Key已配置${NC}"
     else

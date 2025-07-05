@@ -6,9 +6,9 @@ After=network.target
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/opt/vps-traffic-monitor/vps-api
-Environment=PATH=/opt/vps-traffic-monitor/venv/bin:/usr/local/bin:/usr/bin
-ExecStart=/opt/vps-traffic-monitor/venv/bin/python start.py
+WorkingDirectory=/opt/vps-network-moniter/vps-api
+Environment=PATH=/opt/vps-network-moniter/venv/bin:/usr/local/bin:/usr/bin
+ExecStart=/opt/vps-network-moniter/venv/bin/python start.py
 Restart=always
 RestartSec=10
 

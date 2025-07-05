@@ -50,7 +50,7 @@ sudo apt install certbot
 sudo certbot certonly --standalone -d your-domain.com
 
 # 证书文件位置
-# 自签证书: /opt/vps-traffic-monitor/ssl/
+# 自签证书: /opt/vps-network-moniter/ssl/
 # Let's Encrypt: /etc/letsencrypt/live/your-domain.com/
 ```
 
@@ -63,8 +63,8 @@ VPS_CONFIG = {
     "api_key": "your-secure-api-key",  # 修改为安全的API Key
     "vnstat_path": "/usr/bin/vnstat",
     # 自签证书路径（自动配置）
-    "ssl_keyfile": "/opt/vps-traffic-monitor/ssl/private.key",
-    "ssl_certfile": "/opt/vps-traffic-monitor/ssl/certificate.crt",
+    "ssl_keyfile": "/opt/vps-network-moniter/ssl/private.key",
+    "ssl_certfile": "/opt/vps-network-moniter/ssl/certificate.crt",
     # Let's Encrypt证书路径（如果使用域名）
     # "ssl_keyfile": "/etc/letsencrypt/live/your-domain.com/privkey.pem",
     # "ssl_certfile": "/etc/letsencrypt/live/your-domain.com/fullchain.pem",
@@ -219,16 +219,16 @@ sudo cp -r /var/lib/vnstat /backup/vnstat-$(date +%Y%m%d)
 ### 4. 证书管理
 ```bash
 # 查看自签证书
-ls -la /opt/vps-traffic-monitor/ssl/
+ls -la /opt/vps-network-moniter/ssl/
 
 # 重新生成证书
 sudo bash scripts/deploy.sh
 
 # 查看证书有效期（10年）
-openssl x509 -in /opt/vps-traffic-monitor/ssl/certificate.crt -text -noout | grep "Not After"
+openssl x509 -in /opt/vps-network-moniter/ssl/certificate.crt -text -noout | grep "Not After"
 
 # 查看证书详细信息
-openssl x509 -in /opt/vps-traffic-monitor/ssl/certificate.crt -text -noout
+openssl x509 -in /opt/vps-network-moniter/ssl/certificate.crt -text -noout
 ```
 
 ## 测试功能

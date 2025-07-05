@@ -12,7 +12,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # 配置变量
-PROJECT_DIR="/opt/vps-traffic-monitor"
+PROJECT_DIR="/opt/vps-network-moniter"
 VENV_DIR="$PROJECT_DIR/venv"
 API_DIR="$PROJECT_DIR/vps-api"
 SERVICE_NAME="vps-api"
@@ -224,21 +224,21 @@ setup_self_signed_cert() {
     log_info "生成自签SSL证书..."
     
     # 创建证书目录
-    mkdir -p /opt/vps-traffic-monitor/ssl
+    mkdir -p /opt/vps-network-moniter/ssl
     
     # 生成自签证书（有效期10年）
-    openssl req -x509 -newkey rsa:4096 -keyout /opt/vps-traffic-monitor/ssl/private.key \
-        -out /opt/vps-traffic-monitor/ssl/certificate.crt -days 3650 -nodes \
+    openssl req -x509 -newkey rsa:4096 -keyout /opt/vps-network-moniter/ssl/private.key \
+        -out /opt/vps-network-moniter/ssl/certificate.crt -days 3650 -nodes \
         -subj "/C=CN/ST=State/L=City/O=Organization/CN=localhost"
     
     # 设置权限
-    chmod 600 /opt/vps-traffic-monitor/ssl/private.key
-    chmod 644 /opt/vps-traffic-monitor/ssl/certificate.crt
-    chown -R www-data:www-data /opt/vps-traffic-monitor/ssl
+    chmod 600 /opt/vps-network-moniter/ssl/private.key
+    chmod 644 /opt/vps-network-moniter/ssl/certificate.crt
+    chown -R www-data:www-data /opt/vps-network-moniter/ssl
     
     # 更新配置文件
-    sed -i "s|/path/to/private.key|/opt/vps-traffic-monitor/ssl/private.key|g" "$API_DIR/config.py"
-    sed -i "s|/path/to/certificate.crt|/opt/vps-traffic-monitor/ssl/certificate.crt|g" "$API_DIR/config.py"
+    sed -i "s|/path/to/private.key|/opt/vps-network-moniter/ssl/private.key|g" "$API_DIR/config.py"
+    sed -i "s|/path/to/certificate.crt|/opt/vps-network-moniter/ssl/certificate.crt|g" "$API_DIR/config.py"
     
     log_info "自签SSL证书配置完成（有效期10年）"
 }
