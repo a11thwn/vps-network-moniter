@@ -1,0 +1,18 @@
+# VPS端API服务依赖包
+# 使用Python 3.11创建虚拟环境
+
+# Web框架
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# 安全认证
+python-multipart==0.0.6
+
+# 数据处理
+pydantic==2.5.0
+
+# 日志和工具
+python-json-logger==2.0.7
+
+# 可选：用于更好的性能
+gunicorn==21.2.0 

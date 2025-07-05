@@ -1,0 +1,31 @@
+name = "vps-traffic-monitor"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "vps-traffic-monitor"
+
+[env.staging]
+name = "vps-traffic-monitor-staging"
+
+# 环境变量配置
+[vars]
+# 节点配置 (JSON格式)
+NODES_CONFIG = '''
+{
+  "node1": {
+    "name": "VPS Node 1",
+    "url": "https://vps1-ip:8443",
+    "api_key": "your-secret-api-key-here"
+  },
+  "node2": {
+    "name": "VPS Node 2", 
+    "url": "https://vps2-ip:8443",
+    "api_key": "your-secret-api-key-here"
+  }
+}
+'''
+
+# 安全配置
+ALLOWED_ORIGINS = "*"
+REQUEST_TIMEOUT = "30" 

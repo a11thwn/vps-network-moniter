@@ -1,0 +1,19 @@
+{
+  "name": "vps-traffic-monitor-workers",
+  "version": "1.0.0",
+  "description": "Cloudflare Workers proxy for VPS traffic monitoring",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.22.1"
+  },
+  "dependencies": {
+    "itty-router": "^4.0.27"
+  }
+}
