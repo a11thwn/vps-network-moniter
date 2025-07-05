@@ -49,10 +49,20 @@ check_system() {
         exit 1
     fi
     
-    # 检查vnstat
+    # 检查并安装vnstat
     if ! command -v vnstat &> /dev/null; then
-        log_warn "vnstat 未安装，正在安装..."
+        log_info "vnstat 未安装，正在安装..."
         apt update && apt install -y vnstat
+        
+        # 启动vnstat服务
+        systemctl enable vnstat
+        systemctl start vnstat
+        
+        # 等待vnstat收集初始数据
+        log_info "等待vnstat收集初始数据..."
+        sleep 10
+    else
+        log_info "vnstat 已安装，版本: $(vnstat --version | head -n1)"
     fi
     
     log_info "系统要求检查完成"
@@ -134,9 +144,41 @@ setup_ssl() {
     log_info "配置SSL证书..."
     
     if [ -z "$DOMAIN" ]; then
-        log_warn "未指定域名，跳过SSL配置"
-        return
+        log_info "未指定域名，使用自签证书..."
+        setup_self_signed_cert
+    else
+        log_info "使用Let's Encrypt证书..."
+        setup_letsencrypt_cert
     fi
+}
+
+# 配置自签证书
+setup_self_signed_cert() {
+    log_info "生成自签SSL证书..."
+    
+    # 创建证书目录
+    mkdir -p /opt/vps-traffic-monitor/ssl
+    
+    # 生成自签证书（有效期10年）
+    openssl req -x509 -newkey rsa:4096 -keyout /opt/vps-traffic-monitor/ssl/private.key \
+        -out /opt/vps-traffic-monitor/ssl/certificate.crt -days 3650 -nodes \
+        -subj "/C=CN/ST=State/L=City/O=Organization/CN=localhost"
+    
+    # 设置权限
+    chmod 600 /opt/vps-traffic-monitor/ssl/private.key
+    chmod 644 /opt/vps-traffic-monitor/ssl/certificate.crt
+    chown -R www-data:www-data /opt/vps-traffic-monitor/ssl
+    
+    # 更新配置文件
+    sed -i "s|/path/to/private.key|/opt/vps-traffic-monitor/ssl/private.key|g" "$API_DIR/config.py"
+    sed -i "s|/path/to/certificate.crt|/opt/vps-traffic-monitor/ssl/certificate.crt|g" "$API_DIR/config.py"
+    
+    log_info "自签SSL证书配置完成（有效期10年）"
+}
+
+# 配置Let's Encrypt证书
+setup_letsencrypt_cert() {
+    log_info "配置Let's Encrypt证书..."
     
     # 安装certbot
     if ! command -v certbot &> /dev/null; then
@@ -151,7 +193,7 @@ setup_ssl() {
     sed -i "s|/path/to/private.key|/etc/letsencrypt/live/$DOMAIN/privkey.pem|g" "$API_DIR/config.py"
     sed -i "s|/path/to/certificate.crt|/etc/letsencrypt/live/$DOMAIN/fullchain.pem|g" "$API_DIR/config.py"
     
-    log_info "SSL证书配置完成"
+    log_info "Let's Encrypt SSL证书配置完成"
 }
 
 # 生成API Key
@@ -193,7 +235,12 @@ show_info() {
     echo "查看日志: journalctl -u $SERVICE_NAME -f"
     echo
     echo "=== 测试API ==="
-    echo "curl -H 'Authorization: Bearer $API_KEY' https://$DOMAIN:8443/status"
+    if [ ! -z "$DOMAIN" ]; then
+        echo "curl -H 'Authorization: Bearer $API_KEY' https://$DOMAIN:8443/status"
+    else
+        echo "curl -k -H 'Authorization: Bearer $API_KEY' https://localhost:8443/status"
+        echo "curl -k -H 'Authorization: Bearer $API_KEY' https://your-vps-ip:8443/status"
+    fi
     echo
 }
 
@@ -208,9 +255,8 @@ main() {
     setup_service
     setup_firewall
     
-    if [ ! -z "$DOMAIN" ]; then
-        setup_ssl
-    fi
+    # 总是配置SSL证书（自签或Let's Encrypt）
+    setup_ssl
     
     generate_api_key
     start_service
@@ -224,12 +270,13 @@ show_help() {
     echo "用法: $0 [选项]"
     echo
     echo "选项:"
-    echo "  -d, --domain DOMAIN    指定域名 (用于SSL证书)"
-    echo "  -e, --email EMAIL      指定邮箱 (用于SSL证书)"
+    echo "  -d, --domain DOMAIN    指定域名 (用于Let's Encrypt证书，可选)"
+    echo "  -e, --email EMAIL      指定邮箱 (用于Let's Encrypt证书，可选)"
     echo "  -h, --help             显示此帮助信息"
     echo
     echo "示例:"
-    echo "  $0 -d example.com -e admin@example.com"
+    echo "  $0                      # 使用自签证书"
+    echo "  $0 -d example.com -e admin@example.com  # 使用Let's Encrypt证书"
     echo
 }
 

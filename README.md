@@ -41,13 +41,16 @@ pip install -r requirements.txt
 
 #### 配置SSL证书
 ```bash
-# 使用Let's Encrypt获取免费SSL证书
+# 方法1: 使用自签证书（推荐，无需域名）
+# 部署脚本会自动生成自签证书
+
+# 方法2: 使用Let's Encrypt证书（需要域名）
 sudo apt install certbot
 sudo certbot certonly --standalone -d your-domain.com
 
 # 证书文件位置
-# /etc/letsencrypt/live/your-domain.com/privkey.pem
-# /etc/letsencrypt/live/your-domain.com/fullchain.pem
+# 自签证书: /opt/vps-traffic-monitor/ssl/
+# Let's Encrypt: /etc/letsencrypt/live/your-domain.com/
 ```
 
 #### 修改配置
@@ -58,17 +61,25 @@ VPS_CONFIG = {
     "port": 8443,
     "api_key": "your-secure-api-key",  # 修改为安全的API Key
     "vnstat_path": "/usr/bin/vnstat",
-    "ssl_keyfile": "/etc/letsencrypt/live/your-domain.com/privkey.pem",
-    "ssl_certfile": "/etc/letsencrypt/live/your-domain.com/fullchain.pem",
+    # 自签证书路径（自动配置）
+    "ssl_keyfile": "/opt/vps-traffic-monitor/ssl/private.key",
+    "ssl_certfile": "/opt/vps-traffic-monitor/ssl/certificate.crt",
+    # Let's Encrypt证书路径（如果使用域名）
+    # "ssl_keyfile": "/etc/letsencrypt/live/your-domain.com/privkey.pem",
+    # "ssl_certfile": "/etc/letsencrypt/live/your-domain.com/fullchain.pem",
 }
 ```
 
 #### 启动服务
 ```bash
-# 开发模式
+# 方法1: 一键部署（推荐）
+sudo bash scripts/deploy.sh                    # 使用自签证书
+sudo bash scripts/deploy.sh -d example.com -e admin@example.com  # 使用Let's Encrypt证书
+
+# 方法2: 手动部署
 python start.py
 
-# 生产模式 (使用systemd)
+# 方法3: 生产模式 (使用systemd)
 sudo cp vps-api.service /etc/systemd/system/
 sudo systemctl enable vps-api
 sudo systemctl start vps-api
@@ -204,6 +215,47 @@ sudo cp -r /var/lib/vnstat /backup/vnstat-$(date +%Y%m%d)
 - 启用gzip压缩
 - 设置缓存策略
 
+### 4. 证书管理
+```bash
+# 查看自签证书
+ls -la /opt/vps-traffic-monitor/ssl/
+
+# 重新生成证书
+sudo bash scripts/deploy.sh
+
+# 查看证书有效期（10年）
+openssl x509 -in /opt/vps-traffic-monitor/ssl/certificate.crt -text -noout | grep "Not After"
+
+# 查看证书详细信息
+openssl x509 -in /opt/vps-traffic-monitor/ssl/certificate.crt -text -noout
+```
+
+## 测试功能
+
+### 快速测试
+```bash
+# 运行快速测试脚本
+sudo bash scripts/quick-test.sh
+
+# 运行完整测试脚本
+sudo bash scripts/test.sh
+```
+
+### 手动测试
+```bash
+# 1. 检查vnstat
+vnstat --version
+vnstat --json
+
+# 2. 检查API服务
+systemctl status vps-api
+netstat -tlnp | grep 8443
+
+# 3. 测试API接口
+curl -k -H "Authorization: Bearer your-api-key" https://localhost:8443/status
+curl -k -H "Authorization: Bearer your-api-key" https://localhost:8443/traffic
+```
+
 ## 故障排除
 
 ### 常见问题
@@ -216,6 +268,9 @@ sudo cp -r /var/lib/vnstat /backup/vnstat-$(date +%Y%m%d)
    
    # 检查权限
    sudo chown -R vnstat:vnstat /var/lib/vnstat
+   
+   # 重启vnstat服务
+   sudo systemctl restart vnstat
    ```
 
 2. **SSL证书问题**
