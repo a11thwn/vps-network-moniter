@@ -119,6 +119,14 @@ setup_directories() {
     mkdir -p "$API_DIR"
     mkdir -p /var/log/vps-api
     
+    # 复制项目文件
+    log_info "复制项目文件..."
+    cp -r vps-api/* "$API_DIR/"
+    cp -r scripts "$PROJECT_DIR/"
+    cp -r frontend "$PROJECT_DIR/" 2>/dev/null || true
+    cp -r workers "$PROJECT_DIR/" 2>/dev/null || true
+    cp README.md "$PROJECT_DIR/" 2>/dev/null || true
+    
     # 设置权限
     chown -R www-data:www-data "$PROJECT_DIR"
     chmod -R 755 "$PROJECT_DIR"
@@ -157,7 +165,8 @@ setup_venv() {
     if [ -f "$API_DIR/requirements.txt" ]; then
         pip install -r "$API_DIR/requirements.txt"
     else
-        log_error "requirements.txt 文件不存在"
+        log_error "requirements.txt 文件不存在于 $API_DIR/requirements.txt"
+        log_error "请确保项目文件已正确复制"
         exit 1
     fi
     
