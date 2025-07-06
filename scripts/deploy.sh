@@ -277,10 +277,22 @@ generate_api_key() {
     log_info "生成API Key..."
     
     API_KEY=$(openssl rand -hex 32)
+    
+    # 更新配置文件中的API Key
     sed -i "s|your-secret-api-key-here|$API_KEY|g" "$API_DIR/config.py"
     
-    log_info "API Key已生成: $API_KEY"
-    log_warn "请保存此API Key，用于Workers配置"
+    # 验证更新是否成功
+    if grep -q "$API_KEY" "$API_DIR/config.py"; then
+        log_info "API Key已生成并更新到配置文件: $API_KEY"
+        log_warn "请保存此API Key，用于Workers配置"
+    else
+        log_error "API Key更新失败"
+        exit 1
+    fi
+    
+    # 确保配置文件权限正确
+    chown www-data:www-data "$API_DIR/config.py"
+    chmod 644 "$API_DIR/config.py"
 }
 
 # 启动服务

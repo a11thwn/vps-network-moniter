@@ -33,15 +33,39 @@ else
     echo -e "${YELLOW}⚠ vps-api服务未运行，正在启动...${NC}"
     systemctl start vps-api
     sleep 3
+    
+    # 检查启动是否成功
+    if ! systemctl is-active --quiet vps-api; then
+        echo -e "${RED}✗ 服务启动失败，查看错误日志:${NC}"
+        journalctl -u vps-api --no-pager -n 10
+        echo
+        echo -e "${YELLOW}尝试运行修复脚本...${NC}"
+        if [ -f "scripts/fix-config.sh" ]; then
+            bash scripts/fix-config.sh
+        else
+            echo -e "${RED}修复脚本不存在，请重新部署${NC}"
+        fi
+        exit 1
+    fi
 fi
 echo
 
 # 3. 检查端口
 echo "3. 检查端口监听..."
-if netstat -tlnp | grep -q ":8443"; then
+if ss -tlnp | grep -q ":8443"; then
     echo -e "${GREEN}✓ 8443端口正在监听${NC}"
 else
     echo -e "${RED}✗ 8443端口未监听${NC}"
+    echo "尝试检查服务状态..."
+    systemctl status vps-api --no-pager
+    echo
+    echo "查看服务日志:"
+    journalctl -u vps-api --no-pager -n 20
+    echo
+    echo "尝试手动启动服务..."
+    systemctl restart vps-api
+    sleep 3
+    systemctl status vps-api --no-pager
     exit 1
 fi
 echo

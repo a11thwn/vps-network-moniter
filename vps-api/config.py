@@ -85,6 +85,8 @@ def validate_config():
     # 检查API Key
     if not VPS_CONFIG["api_key"] or VPS_CONFIG["api_key"] == "your-secret-api-key-here":
         errors.append("Please set a secure API key")
+    elif len(VPS_CONFIG["api_key"]) < 32:
+        errors.append("API key should be at least 32 characters long")
     
     return errors
 
